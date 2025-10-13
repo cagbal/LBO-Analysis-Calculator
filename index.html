@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive LBO Analysis Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .input-group {
+            position: relative;
+        }
+        .input-unit {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+        input[type=number] {
+            padding-right: 2.5rem; /* Make space for the unit */
+        }
+        .glowing-text {
+             text-shadow: 0 0 8px rgba(59, 130, 246, 0.7);
+        }
+        .result-card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #4b5563;
+            color: #d1d5db;
+            text-align: center;
+            font-size: 12px;
+            line-height: 16px;
+            cursor: pointer;
+            font-style: italic;
+            font-family: serif;
+            margin-left: 8px;
+            transition: background-color 0.2s;
+        }
+        .info-icon:hover {
+            background-color: #6b7280;
+        }
+        #toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #111827;
+            color: #e5e7eb;
+            padding: 16px 24px;
+            border-radius: 8px;
+            border: 1px solid #374151;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: bottom 0.5s ease-in-out;
+            z-index: 100;
+            max-width: 90%;
+            text-align: center;
+        }
+        #toast.show {
+            bottom: 30px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 antialiased">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">LBO Analysis Calculator</h1>
+            <p class="text-lg text-gray-400">Model a leveraged buyout by adjusting the assumptions below.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Inputs -->
+            <div class="lg-col-span-1 space-y-8">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white border-b border-gray-700 pb-2">Transaction Assumptions</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="purchasePrice" class="block text-sm font-medium text-gray-400 mb-1">Purchase Price <span class="info-icon" data-tooltip="The total price paid to acquire the target company, also known as the Enterprise Value.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="purchasePrice" value="450000" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">€</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="ebitdaMultiple" class="block text-sm font-medium text-gray-400 mb-1">Entry EBITDA Multiple <span class="info-icon" data-tooltip="The purchase price expressed as a multiple of the company's EBITDA (Earnings Before Interest, Taxes, Depreciation, and Amortization). A key valuation metric.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="ebitdaMultiple" value="4.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">x</span>
+                            </div>
+                        </div>
+                         <div>
+                            <label for="transactionFees" class="block text-sm font-medium text-gray-400 mb-1">Transaction Fees <span class="info-icon" data-tooltip="Costs associated with the acquisition, such as legal, advisory, and due diligence fees. Expressed as a percentage of the purchase price.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="transactionFees" value="4" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white border-b border-gray-700 pb-2">Financing & Projections</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="debtFinancing" class="block text-sm font-medium text-gray-400 mb-1">Debt Financing <span class="info-icon" data-tooltip="The percentage of the total acquisition cost (Purchase Price + Fees) that is funded with borrowed money (debt).">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="debtFinancing" value="50" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="interestRate" class="block text-sm font-medium text-gray-400 mb-1">Interest Rate <span class="info-icon" data-tooltip="The annual interest rate paid on the debt used to finance the acquisition.">i</span></label>
+                             <div class="input-group">
+                                <input type="number" id="interestRate" value="8.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                         <div>
+                            <label for="revenueGrowth" class="block text-sm font-medium text-gray-400 mb-1">Annual Revenue Growth <span class="info-icon" data-tooltip="The projected year-over-year growth rate of the company's revenue.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="revenueGrowth" value="2.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                         <div>
+                            <label for="ebitdaMargin" class="block text-sm font-medium text-gray-400 mb-1">EBITDA Margin <span class="info-icon" data-tooltip="The company's profitability, calculated as EBITDA divided by Revenue. This model assumes it's constant, but you can change it to see different scenarios.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="ebitdaMargin" value="9.4" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                         <div>
+                            <label for="capex" class="block text-sm font-medium text-gray-400 mb-1">CapEx as % of Revenue <span class="info-icon" data-tooltip="Capital Expenditures: Funds used by the company to acquire or upgrade physical assets like machinery or vehicles. Expressed as a percentage of annual revenue.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="capex" value="3.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                         <div>
+                            <label for="nwcPct" class="block text-sm font-medium text-gray-400 mb-1">NWC as % of Revenue <span class="info-icon" data-tooltip="Net Working Capital: The capital required for daily operations (e.g., inventory, accounts receivable). Changes in NWC impact cash flow. Expressed as a percentage of revenue.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="nwcPct" value="5.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                         <div>
+                            <label for="taxRate" class="block text-sm font-medium text-gray-400 mb-1">Tax Rate <span class="info-icon" data-tooltip="The corporate tax rate applied to the company's pre-tax profits.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="taxRate" value="30" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white border-b border-gray-700 pb-2">Exit Scenario</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="exitEbitdaMultiple" class="block text-sm font-medium text-gray-400 mb-1">Exit EBITDA Multiple <span class="info-icon" data-tooltip="The multiple of EBITDA at which the company is sold at the end of the investment period. This can be the same or different from the entry multiple.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="exitEbitdaMultiple" value="4.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">x</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="cashSweep" class="block text-sm font-medium text-gray-400 mb-1">Cash Sweep for Debt <span class="info-icon" data-tooltip="The percentage of available cash flow that is used to repay debt each year. 100% means all available cash is used for repayment.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="cashSweep" value="100" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="calculateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-300 shadow-lg">
+                    Calculate LBO
+                </button>
+            </div>
+
+            <!-- Right Column: Outputs -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Key Metrics -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="result-card text-center">
+                        <h3 class="text-gray-400 font-medium text-md mb-2">IRR</h3>
+                        <p id="irrResult" class="text-4xl font-bold text-blue-400 glowing-text">-</p>
+                    </div>
+                    <div class="result-card text-center">
+                        <h3 class="text-gray-400 font-medium text-md mb-2">MoIC</h3>
+                        <p id="moicResult" class="text-4xl font-bold text-green-400 glowing-text">-</p>
+                    </div>
+                    <div class="result-card text-center">
+                        <h3 class="text-gray-400 font-medium text-md mb-2">Initial Equity</h3>
+                        <p id="equityResult" class="text-4xl font-bold text-white">-</p>
+                    </div>
+                </div>
+
+                <!-- Projections Table -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white">5-Year Projections</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-700 text-gray-300 uppercase">
+                                <tr>
+                                    <th class="p-3">Metric</th>
+                                    <th class="p-3 text-right">Year 1</th>
+                                    <th class="p-3 text-right">Year 2</th>
+                                    <th class="p-3 text-right">Year 3</th>
+                                    <th class="p-3 text-right">Year 4</th>
+                                    <th class="p-3 text-right">Year 5</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTable" class="divide-y divide-gray-700">
+                                <!-- JS will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Debt Paydown Chart -->
+                 <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white">Debt Paydown Schedule</h2>
+                    <canvas id="debtChart"></canvas>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Toast Notification -->
+        <div id="toast">This is a toast message.</div>
+
+    </div>
+
+    <script>
+        const calculateBtn = document.getElementById('calculateBtn');
+        const resultsTable = document.getElementById('resultsTable');
+        const irrResult = document.getElementById('irrResult');
+        const moicResult = document.getElementById('moicResult');
+        const equityResult = document.getElementById('equityResult');
+        const entryEbitdaMultipleInput = document.getElementById('ebitdaMultiple');
+        const exitEbitdaMultipleInput = document.getElementById('exitEbitdaMultiple');
+        const ebitdaMarginInput = document.getElementById('ebitdaMargin');
+        const toast = document.getElementById('toast');
+        let toastTimeout;
+
+        let debtChartInstance;
+
+        // --- Helper function to format numbers as currency ---
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
+        };
+
+        const calculateLBO = () => {
+            // --- 1. Gather all inputs from the form ---
+            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
+            const entryMultiple = parseFloat(entryEbitdaMultipleInput.value);
+            const exitMultiple = parseFloat(exitEbitdaMultipleInput.value);
+            const transactionFeesPct = parseFloat(document.getElementById('transactionFees').value) / 100;
+            const debtFinancingPct = parseFloat(document.getElementById('debtFinancing').value) / 100;
+            const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+            const revenueGrowth = parseFloat(document.getElementById('revenueGrowth').value) / 100;
+            const ebitdaMargin = parseFloat(ebitdaMarginInput.value) / 100;
+            const capexPct = parseFloat(document.getElementById('capex').value) / 100;
+            const nwcPct = parseFloat(document.getElementById('nwcPct').value) / 100;
+            const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
+            const cashSweepPct = parseFloat(document.getElementById('cashSweep').value) / 100;
+            
+            // Basic validation to prevent NaN errors
+            if (!purchasePrice || !entryMultiple || !ebitdaMargin) {
+                return;
+            }
+
+            // --- 2. Calculate initial transaction values ---
+            const impliedEbitda = purchasePrice / entryMultiple;
+            const initialRevenue = impliedEbitda / ebitdaMargin;
+            
+            const transactionFees = purchasePrice * transactionFeesPct;
+            const totalUses = purchasePrice + transactionFees;
+
+            const totalDebt = totalUses * debtFinancingPct;
+            const initialEquity = totalUses - totalDebt;
+
+            // --- 3. Run the 5-year projection loop ---
+            let projections = [];
+            let beginningDebt = totalDebt;
+            let currentRevenue = initialRevenue;
+            let debtSchedule = [totalDebt];
+            let accumulatedCash = 0;
+            let lastYearNWC = initialRevenue * nwcPct;
+
+            for (let i = 1; i <= 5; i++) {
+                currentRevenue *= (1 + revenueGrowth);
+                const ebitda = currentRevenue * ebitdaMargin;
+                const capex = currentRevenue * capexPct;
+                
+                const currentNWC = currentRevenue * nwcPct;
+                const changeInNWC = currentNWC - lastYearNWC;
+                lastYearNWC = currentNWC;
+
+                const interestExpense = beginningDebt * interestRate;
+                
+                const preTaxProfit = ebitda - capex - interestExpense;
+                const taxes = Math.max(0, preTaxProfit * taxRate);
+                
+                const cashFlowBeforeDebt = preTaxProfit - taxes - changeInNWC;
+                const cashForSweep = cashFlowBeforeDebt * cashSweepPct;
+                const debtRepayment = Math.min(Math.max(0, cashForSweep), beginningDebt);
+                const endingDebt = beginningDebt - debtRepayment;
+                
+                const cashRetained = cashFlowBeforeDebt - debtRepayment;
+                accumulatedCash += cashRetained;
+
+                projections.push({
+                    year: i,
+                    revenue: currentRevenue,
+                    ebitda,
+                    changeInNWC,
+                    interestExpense,
+                    debtRepayment,
+                    endingDebt,
+                    accumulatedCash
+                });
+
+                beginningDebt = endingDebt;
+                debtSchedule.push(endingDebt);
+            }
+
+            // --- 4. Calculate exit and returns ---
+            const exitEbitda = projections[4].ebitda;
+            const exitEnterpriseValue = exitEbitda * exitMultiple;
+            const finalDebt = projections[4].endingDebt;
+            const finalCash = projections[4].accumulatedCash;
+            
+            const exitEquityValue = exitEnterpriseValue - finalDebt + finalCash; 
+
+            const moic = exitEquityValue / initialEquity;
+            const irr = Math.pow(moic, 1 / 5) - 1;
+
+            // --- 5. Update the UI with the results ---
+            updateUI(projections, irr, moic, initialEquity, debtSchedule);
+        };
+        
+        const updateUI = (projections, irr, moic, initialEquity, debtSchedule) => {
+            // Update key metrics
+            irrResult.textContent = `${(irr * 100).toFixed(1)}%`;
+            moicResult.textContent = `${moic.toFixed(2)}x`;
+            equityResult.textContent = formatCurrency(initialEquity).split(',')[0]; 
+
+            // Populate the projections table
+            resultsTable.innerHTML = '';
+            const metrics = [
+                { label: 'Revenue', key: 'revenue' },
+                { label: 'EBITDA', key: 'ebitda' },
+                { label: 'Change in NWC', key: 'changeInNWC', isNew: true, isRed: true },
+                { label: 'Interest Expense', key: 'interestExpense' },
+                { label: 'Debt Repayment', key: 'debtRepayment' },
+                { label: 'Accumulated Cash', key: 'accumulatedCash', isNew: true },
+                { label: 'Ending Debt', key: 'endingDebt', isBold: true },
+            ];
+
+            metrics.forEach(metric => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-700 last:border-b-0';
+                if(metric.isBold) row.classList.add('font-semibold', 'text-white');
+                if(metric.isNew && !metric.isRed) row.classList.add('text-green-400');
+                if(metric.isRed) row.classList.add('text-red-400');
+
+                let rowHTML = `<td class="p-3">${metric.label}</td>`;
+                projections.forEach(year => {
+                    rowHTML += `<td class="p-3 text-right">${formatCurrency(year[metric.key])}</td>`;
+                });
+                row.innerHTML = rowHTML;
+                resultsTable.appendChild(row);
+            });
+            
+            // Update or create the chart
+            const chartCtx = document.getElementById('debtChart').getContext('2d');
+            const chartLabels = ['Start', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'];
+            
+            if (debtChartInstance) {
+                debtChartInstance.destroy();
+            }
+
+            debtChartInstance = new Chart(chartCtx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Remaining Debt (€)',
+                        data: debtSchedule,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: 'rgba(59, 130, 246, 1)',
+                        tension: 0.1,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { 
+                                color: '#9ca3af',
+                                callback: function(value, index, values) {
+                                    return '€' + (value / 1000) + 'k';
+                                }
+                            },
+                            grid: { color: '#374151' }
+                        },
+                        x: {
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: '#374151' }
+                        }
+                    }
+                }
+            });
+        };
+        
+        const syncMultiples = () => {
+            exitEbitdaMultipleInput.value = entryEbitdaMultipleInput.value;
+        };
+        
+        const autoFillEbitdaMargin = () => {
+            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
+            const entryMultiple = parseFloat(entryEbitdaMultipleInput.value);
+            if (purchasePrice > 0 && entryMultiple > 0) {
+                 const impliedEbitda = purchasePrice / entryMultiple;
+                 // Using a placeholder revenue to derive a margin. 
+                 // A better real-world model would require actual revenue figures.
+                 const plausibleRevenue = impliedEbitda / 0.094; // Re-arranging our old assumption
+                 const margin = (impliedEbitda / plausibleRevenue) * 100;
+                 if (isFinite(margin)) {
+                    ebitdaMarginInput.value = margin.toFixed(1);
+                 }
+            }
+        };
+        
+        const showToast = (message) => {
+            clearTimeout(toastTimeout);
+            toast.textContent = message;
+            toast.classList.add('show');
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000); // Hide after 4 seconds
+        };
+
+        // --- Event Listeners ---
+        calculateBtn.addEventListener('click', calculateLBO);
+        entryEbitdaMultipleInput.addEventListener('change', () => {
+            syncMultiples();
+            autoFillEbitdaMargin();
+        });
+        document.getElementById('purchasePrice').addEventListener('change', autoFillEbitdaMargin);
+
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('info-icon')) {
+                const tooltipText = e.target.getAttribute('data-tooltip');
+                showToast(tooltipText);
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            autoFillEbitdaMargin();
+            calculateLBO();
+        });
+
+    </script>
+</body>
+</html>
+
+
