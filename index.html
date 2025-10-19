@@ -75,6 +75,23 @@
         #toast.show {
             bottom: 30px;
         }
+        .sensitivity-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        .sensitivity-table th, .sensitivity-table td {
+            border: 1px solid #4b5563;
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .sensitivity-table th {
+            background-color: #374151;
+        }
+        .sensitivity-table .header-col {
+            background-color: #374151;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 antialiased">
@@ -94,21 +111,28 @@
                         <div>
                             <label for="purchasePrice" class="block text-sm font-medium text-gray-400 mb-1">Purchase Price <span class="info-icon" data-tooltip="The total price paid to acquire the target company, also known as the Enterprise Value.">i</span></label>
                             <div class="input-group">
-                                <input type="number" id="purchasePrice" value="450000" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="purchasePrice" value="150000" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                                 <span class="input-unit">€</span>
                             </div>
                         </div>
                         <div>
                             <label for="ebitdaMultiple" class="block text-sm font-medium text-gray-400 mb-1">Entry EBITDA Multiple <span class="info-icon" data-tooltip="The purchase price expressed as a multiple of the company's EBITDA (Earnings Before Interest, Taxes, Depreciation, and Amortization). A key valuation metric.">i</span></label>
                             <div class="input-group">
-                                <input type="number" id="ebitdaMultiple" value="4.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="ebitdaMultiple" value="3.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                                 <span class="input-unit">x</span>
+                            </div>
+                        </div>
+                        <!-- NEW: Implied EBITDA Display -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Implied LTM EBITDA <span class="info-icon" data-tooltip="The Earnings Before Interest, Taxes, Depreciation, and Amortization for the Last Twelve Months, implied by the Purchase Price and Entry Multiple.">i</span></label>
+                            <div class="w-full bg-gray-900 border-gray-700 border text-white rounded-md p-2 text-lg">
+                                <span id="impliedEbitdaDisplay">-</span>
                             </div>
                         </div>
                          <div>
                             <label for="transactionFees" class="block text-sm font-medium text-gray-400 mb-1">Transaction Fees <span class="info-icon" data-tooltip="Costs associated with the acquisition, such as legal, advisory, and due diligence fees. Expressed as a percentage of the purchase price.">i</span></label>
                             <div class="input-group">
-                                <input type="number" id="transactionFees" value="4" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="transactionFees" value="5" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                                 <span class="input-unit">%</span>
                             </div>
                         </div>
@@ -128,7 +152,7 @@
                         <div>
                             <label for="interestRate" class="block text-sm font-medium text-gray-400 mb-1">Interest Rate <span class="info-icon" data-tooltip="The annual interest rate paid on the debt used to finance the acquisition.">i</span></label>
                              <div class="input-group">
-                                <input type="number" id="interestRate" value="8.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="interestRate" value="10.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                                 <span class="input-unit">%</span>
                             </div>
                         </div>
@@ -142,14 +166,21 @@
                          <div>
                             <label for="ebitdaMargin" class="block text-sm font-medium text-gray-400 mb-1">EBITDA Margin <span class="info-icon" data-tooltip="The company's profitability, calculated as EBITDA divided by Revenue. This model assumes it's constant, but you can change it to see different scenarios.">i</span></label>
                             <div class="input-group">
-                                <input type="number" id="ebitdaMargin" value="9.4" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="ebitdaMargin" value="15.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                                 <span class="input-unit">%</span>
                             </div>
                         </div>
                          <div>
                             <label for="capex" class="block text-sm font-medium text-gray-400 mb-1">CapEx as % of Revenue <span class="info-icon" data-tooltip="Capital Expenditures: Funds used by the company to acquire or upgrade physical assets like machinery or vehicles. Expressed as a percentage of annual revenue.">i</span></label>
                             <div class="input-group">
-                                <input type="number" id="capex" value="3.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="capex" value="5.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <span class="input-unit">%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="deprAmort" class="block text-sm font-medium text-gray-400 mb-1">D&A as % of Revenue <span class="info-icon" data-tooltip="Depreciation & Amortization: The non-cash expense representing the wear and tear of assets. It reduces taxable income. Often similar to CapEx.">i</span></label>
+                            <div class="input-group">
+                                <input type="number" id="deprAmort" value="4.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                                 <span class="input-unit">%</span>
                             </div>
                         </div>
@@ -176,7 +207,7 @@
                         <div>
                             <label for="exitEbitdaMultiple" class="block text-sm font-medium text-gray-400 mb-1">Exit EBITDA Multiple <span class="info-icon" data-tooltip="The multiple of EBITDA at which the company is sold at the end of the investment period. This can be the same or different from the entry multiple.">i</span></label>
                             <div class="input-group">
-                                <input type="number" id="exitEbitdaMultiple" value="4.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="number" id="exitEbitdaMultiple" value="3.0" step="0.1" class="w-full bg-gray-700 border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
                                 <span class="input-unit">x</span>
                             </div>
                         </div>
@@ -197,7 +228,6 @@
 
             <!-- Right Column: Outputs -->
             <div class="lg:col-span-2 space-y-8">
-                <!-- Key Metrics -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="result-card text-center">
                         <h3 class="text-gray-400 font-medium text-md mb-2">IRR</h3>
@@ -213,7 +243,6 @@
                     </div>
                 </div>
 
-                <!-- Projections Table -->
                 <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
                     <h2 class="text-2xl font-semibold mb-4 text-white">5-Year Projections</h2>
                     <div class="overflow-x-auto">
@@ -235,20 +264,35 @@
                     </div>
                 </div>
 
-                <!-- Debt Paydown Chart -->
-                 <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
                     <h2 class="text-2xl font-semibold mb-4 text-white">Debt Paydown Schedule</h2>
                     <canvas id="debtChart"></canvas>
                 </div>
+
+                <!-- NEW: Sensitivity Analysis Section -->
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-semibold mb-4 text-white">Sensitivity Analysis</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2 text-center text-blue-300">IRR Sensitivity (%)</h3>
+                            <div class="overflow-x-auto" id="irrSensitivityTableContainer"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2 text-center text-green-300">MoIC Sensitivity (x)</h3>
+                            <div class="overflow-x-auto" id="moicSensitivityTableContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
         
-        <!-- Toast Notification -->
         <div id="toast">This is a toast message.</div>
 
     </div>
 
     <script>
+        // --- DOM Element Selection ---
         const calculateBtn = document.getElementById('calculateBtn');
         const resultsTable = document.getElementById('resultsTable');
         const irrResult = document.getElementById('irrResult');
@@ -256,46 +300,46 @@
         const equityResult = document.getElementById('equityResult');
         const entryEbitdaMultipleInput = document.getElementById('ebitdaMultiple');
         const exitEbitdaMultipleInput = document.getElementById('exitEbitdaMultiple');
-        const ebitdaMarginInput = document.getElementById('ebitdaMargin');
+        const purchasePriceInput = document.getElementById('purchasePrice');
+        const impliedEbitdaDisplay = document.getElementById('impliedEbitdaDisplay');
+        const irrSensitivityTableContainer = document.getElementById('irrSensitivityTableContainer');
+        const moicSensitivityTableContainer = document.getElementById('moicSensitivityTableContainer');
         const toast = document.getElementById('toast');
         let toastTimeout;
-
         let debtChartInstance;
 
         // --- Helper function to format numbers as currency ---
         const formatCurrency = (value) => {
-            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
+            if (isNaN(value)) return '-';
+            return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
         };
+        
+        /**
+         * Core LBO Model Calculation Engine
+         * @param {object} inputs - An object containing all necessary parameters for the LBO model.
+         * @returns {object|null} An object with all results, or null if inputs are invalid.
+         */
+        const runLboModel = (inputs) => {
+            const {
+                purchasePrice, entryMultiple, exitMultiple, transactionFeesPct, debtFinancingPct,
+                interestRate, revenueGrowth, ebitdaMargin, capexPct, deprAmortPct,
+                nwcPct, taxRate, cashSweepPct
+            } = inputs;
 
-        const calculateLBO = () => {
-            // --- 1. Gather all inputs from the form ---
-            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
-            const entryMultiple = parseFloat(entryEbitdaMultipleInput.value);
-            const exitMultiple = parseFloat(exitEbitdaMultipleInput.value);
-            const transactionFeesPct = parseFloat(document.getElementById('transactionFees').value) / 100;
-            const debtFinancingPct = parseFloat(document.getElementById('debtFinancing').value) / 100;
-            const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
-            const revenueGrowth = parseFloat(document.getElementById('revenueGrowth').value) / 100;
-            const ebitdaMargin = parseFloat(ebitdaMarginInput.value) / 100;
-            const capexPct = parseFloat(document.getElementById('capex').value) / 100;
-            const nwcPct = parseFloat(document.getElementById('nwcPct').value) / 100;
-            const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
-            const cashSweepPct = parseFloat(document.getElementById('cashSweep').value) / 100;
-            
-            // Basic validation to prevent NaN errors
-            if (!purchasePrice || !entryMultiple || !ebitdaMargin) {
-                return;
+            // --- Basic validation to prevent NaN errors ---
+            if (!purchasePrice || !entryMultiple || !ebitdaMargin || !exitMultiple) {
+                return null;
             }
 
             // --- 2. Calculate initial transaction values ---
             const impliedEbitda = purchasePrice / entryMultiple;
             const initialRevenue = impliedEbitda / ebitdaMargin;
-            
             const transactionFees = purchasePrice * transactionFeesPct;
             const totalUses = purchasePrice + transactionFees;
-
             const totalDebt = totalUses * debtFinancingPct;
             const initialEquity = totalUses - totalDebt;
+
+            if (initialEquity <= 0) return null; // Can't have zero or negative equity
 
             // --- 3. Run the 5-year projection loop ---
             let projections = [];
@@ -309,33 +353,29 @@
                 currentRevenue *= (1 + revenueGrowth);
                 const ebitda = currentRevenue * ebitdaMargin;
                 const capex = currentRevenue * capexPct;
-                
+                const deprAmort = currentRevenue * deprAmortPct;
                 const currentNWC = currentRevenue * nwcPct;
                 const changeInNWC = currentNWC - lastYearNWC;
                 lastYearNWC = currentNWC;
-
                 const interestExpense = beginningDebt * interestRate;
                 
-                const preTaxProfit = ebitda - capex - interestExpense;
+                const preTaxProfit = ebitda - deprAmort - interestExpense;
                 const taxes = Math.max(0, preTaxProfit * taxRate);
                 
-                const cashFlowBeforeDebt = preTaxProfit - taxes - changeInNWC;
-                const cashForSweep = cashFlowBeforeDebt * cashSweepPct;
+                // --- CORRECTED Cash Flow Calculation ---
+                // This is the cash flow available for debt service (interest + principal) and equity holders
+                const cashFlowForDebtService = ebitda - taxes - capex - changeInNWC - interestExpense;
+
+                const cashForSweep = cashFlowForDebtService * cashSweepPct;
                 const debtRepayment = Math.min(Math.max(0, cashForSweep), beginningDebt);
                 const endingDebt = beginningDebt - debtRepayment;
                 
-                const cashRetained = cashFlowBeforeDebt - debtRepayment;
+                const cashRetained = cashFlowForDebtService - debtRepayment;
                 accumulatedCash += cashRetained;
 
                 projections.push({
-                    year: i,
-                    revenue: currentRevenue,
-                    ebitda,
-                    changeInNWC,
-                    interestExpense,
-                    debtRepayment,
-                    endingDebt,
-                    accumulatedCash
+                    year: i, revenue: currentRevenue, ebitda, deprAmort, taxes, changeInNWC,
+                    interestExpense, debtRepayment, endingDebt, accumulatedCash
                 });
 
                 beginningDebt = endingDebt;
@@ -347,31 +387,60 @@
             const exitEnterpriseValue = exitEbitda * exitMultiple;
             const finalDebt = projections[4].endingDebt;
             const finalCash = projections[4].accumulatedCash;
-            
-            const exitEquityValue = exitEnterpriseValue - finalDebt + finalCash; 
-
+            const exitEquityValue = exitEnterpriseValue - finalDebt + finalCash;
             const moic = exitEquityValue / initialEquity;
-            const irr = Math.pow(moic, 1 / 5) - 1;
+            const irr = moic > 0 ? Math.pow(moic, 1 / 5) - 1 : -1;
 
-            // --- 5. Update the UI with the results ---
-            updateUI(projections, irr, moic, initialEquity, debtSchedule);
+            return { projections, irr, moic, initialEquity, debtSchedule };
+        };
+
+        /**
+         * Main function to trigger calculations and update the entire UI
+         */
+        const calculateAndDisplayLBO = () => {
+            // 1. Gather all inputs from the form into an 'inputs' object
+            const inputs = {
+                purchasePrice: parseFloat(document.getElementById('purchasePrice').value),
+                entryMultiple: parseFloat(entryEbitdaMultipleInput.value),
+                exitMultiple: parseFloat(exitEbitdaMultipleInput.value),
+                transactionFeesPct: parseFloat(document.getElementById('transactionFees').value) / 100,
+                debtFinancingPct: parseFloat(document.getElementById('debtFinancing').value) / 100,
+                interestRate: parseFloat(document.getElementById('interestRate').value) / 100,
+                revenueGrowth: parseFloat(document.getElementById('revenueGrowth').value) / 100,
+                ebitdaMargin: parseFloat(document.getElementById('ebitdaMargin').value) / 100,
+                capexPct: parseFloat(document.getElementById('capex').value) / 100,
+                deprAmortPct: parseFloat(document.getElementById('deprAmort').value) / 100,
+                nwcPct: parseFloat(document.getElementById('nwcPct').value) / 100,
+                taxRate: parseFloat(document.getElementById('taxRate').value) / 100,
+                cashSweepPct: parseFloat(document.getElementById('cashSweep').value) / 100,
+            };
+
+            const mainResults = runLboModel(inputs);
+            
+            if (mainResults) {
+                updateUI(mainResults.projections, mainResults.irr, mainResults.moic, mainResults.initialEquity, mainResults.debtSchedule);
+                runSensitivityAnalysis(inputs);
+            }
         };
         
+        /**
+         * Updates the main results display (cards, table, chart)
+         */
         const updateUI = (projections, irr, moic, initialEquity, debtSchedule) => {
-            // Update key metrics
             irrResult.textContent = `${(irr * 100).toFixed(1)}%`;
             moicResult.textContent = `${moic.toFixed(2)}x`;
-            equityResult.textContent = formatCurrency(initialEquity).split(',')[0]; 
+            equityResult.textContent = formatCurrency(initialEquity).split(',')[0];
 
-            // Populate the projections table
             resultsTable.innerHTML = '';
             const metrics = [
                 { label: 'Revenue', key: 'revenue' },
                 { label: 'EBITDA', key: 'ebitda' },
-                { label: 'Change in NWC', key: 'changeInNWC', isNew: true, isRed: true },
-                { label: 'Interest Expense', key: 'interestExpense' },
-                { label: 'Debt Repayment', key: 'debtRepayment' },
-                { label: 'Accumulated Cash', key: 'accumulatedCash', isNew: true },
+                { label: 'D&A', key: 'deprAmort' },
+                { label: 'Interest Expense', key: 'interestExpense', isRed: true },
+                { label: 'Taxes', key: 'taxes', isRed: true },
+                { label: 'Change in NWC', key: 'changeInNWC', isRed: true },
+                { label: 'Debt Repayment', key: 'debtRepayment', isGreen: true },
+                { label: 'Accumulated Cash', key: 'accumulatedCash' },
                 { label: 'Ending Debt', key: 'endingDebt', isBold: true },
             ];
 
@@ -379,7 +448,7 @@
                 const row = document.createElement('tr');
                 row.className = 'border-b border-gray-700 last:border-b-0';
                 if(metric.isBold) row.classList.add('font-semibold', 'text-white');
-                if(metric.isNew && !metric.isRed) row.classList.add('text-green-400');
+                if(metric.isGreen) row.classList.add('text-green-400');
                 if(metric.isRed) row.classList.add('text-red-400');
 
                 let rowHTML = `<td class="p-3">${metric.label}</td>`;
@@ -390,7 +459,13 @@
                 resultsTable.appendChild(row);
             });
             
-            // Update or create the chart
+            updateDebtChart(debtSchedule);
+        };
+
+        /**
+         * Updates or creates the debt paydown chart
+         */
+        const updateDebtChart = (debtSchedule) => {
             const chartCtx = document.getElementById('debtChart').getContext('2d');
             const chartLabels = ['Start', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'];
             
@@ -417,20 +492,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { 
-                                color: '#9ca3af',
-                                callback: function(value, index, values) {
-                                    return '€' + (value / 1000) + 'k';
-                                }
-                            },
+                            ticks: { color: '#9ca3af', callback: (value) => '€' + (value / 1000) + 'k' },
                             grid: { color: '#374151' }
                         },
                         x: {
@@ -441,26 +507,83 @@
                 }
             });
         };
+
+        /**
+         * Runs the sensitivity analysis and populates the tables
+         */
+        const runSensitivityAnalysis = (baseInputs) => {
+            const exitMultiple = parseFloat(exitEbitdaMultipleInput.value);
+            const ebitdaMargin = parseFloat(document.getElementById('ebitdaMargin').value);
+
+            const multipleRange = [exitMultiple - 1, exitMultiple - 0.5, exitMultiple, exitMultiple + 0.5, exitMultiple + 1].filter(m => m > 0);
+            const marginRange = [ebitdaMargin - 2, ebitdaMargin - 1, ebitdaMargin, ebitdaMargin + 1, ebitdaMargin + 2].filter(m => m > 0);
+
+            let irrData = [];
+            let moicData = [];
+
+            for (const margin of marginRange) {
+                let irrRow = [];
+                let moicRow = [];
+                for (const multiple of multipleRange) {
+                    const modifiedInputs = { ...baseInputs, exitMultiple: multiple, ebitdaMargin: margin / 100 };
+                    const result = runLboModel(modifiedInputs);
+                    irrRow.push(result ? result.irr : null);
+                    moicRow.push(result ? result.moic : null);
+                }
+                irrData.push(irrRow);
+                moicData.push(moicRow);
+            }
+
+            generateSensitivityTable(irrSensitivityTableContainer, 'IRR', marginRange, multipleRange, irrData, (val) => `${(val * 100).toFixed(1)}%`);
+            generateSensitivityTable(moicSensitivityTableContainer, 'MoIC', marginRange, multipleRange, moicData, (val) => `${val.toFixed(2)}x`);
+        };
+
+        /**
+         * Generates and injects an HTML table for sensitivity analysis
+         */
+        const generateSensitivityTable = (container, title, rows, cols, data, formatter) => {
+            let table = `<table class="sensitivity-table"><thead><tr><th>${title}</th>`;
+            cols.forEach(col => table += `<th>${col.toFixed(1)}x</th>`);
+            table += `</tr></thead><tbody>`;
+
+            data.forEach((rowData, i) => {
+                table += `<tr><td class="header-col">${rows[i].toFixed(1)}%</td>`;
+                rowData.forEach(cellData => {
+                    const displayVal = cellData !== null ? formatter(cellData) : '-';
+                    table += `<td>${displayVal}</td>`;
+                });
+                table += `</tr>`;
+            });
+
+            table += `</tbody></table>`;
+            container.innerHTML = table;
+        };
         
+        /**
+         * Updates the Implied EBITDA display field
+         */
+        const updateImpliedEbitda = () => {
+            const price = parseFloat(purchasePriceInput.value);
+            const multiple = parseFloat(entryEbitdaMultipleInput.value);
+
+            if (price > 0 && multiple > 0) {
+                const impliedEbitda = price / multiple;
+                impliedEbitdaDisplay.textContent = formatCurrency(impliedEbitda);
+            } else {
+                impliedEbitdaDisplay.textContent = '-';
+            }
+        };
+
+        /**
+         * Syncs the exit multiple with the entry multiple when it changes
+         */
         const syncMultiples = () => {
             exitEbitdaMultipleInput.value = entryEbitdaMultipleInput.value;
         };
         
-        const autoFillEbitdaMargin = () => {
-            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value);
-            const entryMultiple = parseFloat(entryEbitdaMultipleInput.value);
-            if (purchasePrice > 0 && entryMultiple > 0) {
-                 const impliedEbitda = purchasePrice / entryMultiple;
-                 // Using a placeholder revenue to derive a margin. 
-                 // A better real-world model would require actual revenue figures.
-                 const plausibleRevenue = impliedEbitda / 0.094; // Re-arranging our old assumption
-                 const margin = (impliedEbitda / plausibleRevenue) * 100;
-                 if (isFinite(margin)) {
-                    ebitdaMarginInput.value = margin.toFixed(1);
-                 }
-            }
-        };
-        
+        /**
+         * Shows a toast notification message
+         */
         const showToast = (message) => {
             clearTimeout(toastTimeout);
             toast.textContent = message;
@@ -471,12 +594,12 @@
         };
 
         // --- Event Listeners ---
-        calculateBtn.addEventListener('click', calculateLBO);
-        entryEbitdaMultipleInput.addEventListener('change', () => {
-            syncMultiples();
-            autoFillEbitdaMargin();
-        });
-        document.getElementById('purchasePrice').addEventListener('change', autoFillEbitdaMargin);
+        calculateBtn.addEventListener('click', calculateAndDisplayLBO);
+        entryEbitdaMultipleInput.addEventListener('change', syncMultiples);
+        
+        // Listeners for real-time implied EBITDA update
+        purchasePriceInput.addEventListener('input', updateImpliedEbitda);
+        entryEbitdaMultipleInput.addEventListener('input', updateImpliedEbitda);
 
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('info-icon')) {
@@ -485,13 +608,13 @@
             }
         });
 
+        // --- Initial Calculation on Load ---
         window.addEventListener('DOMContentLoaded', () => {
-            autoFillEbitdaMargin();
-            calculateLBO();
+            updateImpliedEbitda();
+            calculateAndDisplayLBO();
         });
 
     </script>
 </body>
 </html>
-
 
